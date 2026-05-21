@@ -1,0 +1,9 @@
+# Auto-detect text files
+* text=auto
+
+# Git LFS for CAD asset binaries (used Phase 6+)
+*.step filter=lfs diff=lfs merge=lfs -text
+*.stp filter=lfs diff=lfs merge=lfs -text
+*.stl filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text
+*.3mf filter=lfs diff=lfs merge=lfs -text

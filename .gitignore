@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Node
+# ---------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+coverage/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Python venvs
+**/.venv/
+
+# Build outputs
+**/dist/
+**/build/
+**/.next/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+apps/api/index/             # FAISS index built in Phase 6
+apps/api/cache/             # Runtime caches
+apps/web/public/cad/        # Pre-rendered hero thumbnails (Phase 9)
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
