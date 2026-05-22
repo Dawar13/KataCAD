@@ -39,6 +39,12 @@ export interface GenerateRequest {
   params: Record<string, number>;
 }
 
+/** A request to retrieve a Layer 3 part for a prompt. */
+export interface Layer3Request {
+  prompt: string;
+  params: Record<string, number>;
+}
+
 /** A node in an archetype's semantic feature tree. */
 export interface ArchetypeFeatureNode {
   name: string;
