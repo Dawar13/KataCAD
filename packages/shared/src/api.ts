@@ -74,3 +74,18 @@ export interface GenerateResponse {
   step_b64: string;
   metadata: ArchetypeMetadata;
 }
+
+/** A part to analyze for its dossier. */
+export interface DossierRequest {
+  prompt: string;
+  label: string;
+  dimensions: number[];
+  faces: number;
+}
+
+/** AI material selection and manufacturing notes for the dossier. */
+export interface DossierAnalysis {
+  material_id: string;
+  material_reasoning: string;
+  manufacturing_notes: string;
+}
