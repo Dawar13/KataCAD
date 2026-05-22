@@ -17,7 +17,9 @@ import { PromptInput } from "@/components/PromptInput";
 import { VerifyPanel } from "@/components/VerifyPanel";
 import { Viewport } from "@/components/Viewport";
 import { generateLayer2, generateLayer3 } from "@/lib/api/generate";
-import { routePrompt } from "@/lib/api/route";
+import { routeWithFallback } from "@/lib/api/fallback";
+import { getCachedHero, preloadHeroes } from "@/lib/cache/heroCache";
+import { BOOTH_MODE } from "@/lib/config";
 import { useReplicad } from "@/lib/hooks/useReplicad";
 import { downloadBlob } from "@/lib/replicad";
 import {
@@ -97,16 +99,33 @@ export default function StudioClient() {
         return;
       }
       try {
-        const merged: HeroParams = { ...definition.defaultParams, ...params };
-        const model = definition.build(merged);
-        const { compound, bounds } = assembleHero(model);
+        // Use the pre-warmed cache for default-parameter heroes (gallery
+        // clicks); rebuild only when parameters have been changed.
+        const cached =
+          Object.keys(params).length === 0 ? getCachedHero(id) : undefined;
+        let model: HeroModel;
+        let bounds: HeroBounds;
+        let shape: AnyShape;
+        let merged: HeroParams;
+        if (cached) {
+          model = cached.model;
+          bounds = cached.bounds;
+          shape = cached.compound;
+          merged = definition.defaultParams;
+        } else {
+          merged = { ...definition.defaultParams, ...params };
+          model = definition.build(merged);
+          const assembled = assembleHero(model);
+          bounds = assembled.bounds;
+          shape = assembled.compound;
+        }
         commit({
           kind: "hero",
           key: id,
           label: definition.label,
           model,
           bounds,
-          shape: compound,
+          shape,
           params: merged,
           animate: definition.animate,
         });
@@ -152,6 +171,12 @@ export default function StudioClient() {
     };
   }, [status, request, setPart]);
 
+  // Pre-warm all eight heroes once the kernel is ready, so gallery clicks
+  // are instant and Layer 1 is fully network-independent.
+  useEffect(() => {
+    if (status === "ready") preloadHeroes();
+  }, [status]);
+
   const load = (next: StudioRequest): void => {
     setSelectedNode(null);
     setVerifyOpen(false);
@@ -162,7 +187,7 @@ export default function StudioClient() {
     setRouting(true);
     lastPrompt.current = prompt;
     try {
-      const result = await routePrompt(prompt);
+      const result = await routeWithFallback(prompt);
       if (result.layer === 2 && result.archetype) {
         load({ kind: "archetype", name: result.archetype, params: result.params ?? {} });
       } else if (result.layer === 3) {
@@ -221,9 +246,15 @@ export default function StudioClient() {
         </div>
 
         <p className="mt-2">
-          Kernel status: {status}
-          {routing ? " — routing prompt..." : ""}
-          {loaded ? ` — showing ${loaded.label}` : ""}
+          {BOOTH_MODE
+            ? routing
+              ? "Generating..."
+              : loaded
+                ? `Showing ${loaded.label}`
+                : "Ready"
+            : `Kernel status: ${status}${routing ? " — routing prompt..." : ""}${
+                loaded ? ` — showing ${loaded.label}` : ""
+              }`}
         </p>
 
         <div className="mt-2 flex gap-2">
