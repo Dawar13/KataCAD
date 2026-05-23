@@ -1,9 +1,12 @@
-FROM python:3.11-slim
+# Pin to bookworm — Debian 13 (trixie) dropped libgl1-mesa-glx, and we don't
+# want the base image rolling forward and breaking the build under us.
+FROM python:3.11-slim-bookworm
 
 # CadQuery's OCCT bindings (used Phase 5+) need these system libraries.
+# `libgl1` provides libGL.so.1 on both bookworm and trixie.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxrender1 \
