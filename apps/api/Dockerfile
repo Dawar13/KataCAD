@@ -35,4 +35,7 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell-form CMD — Docker runs it via `/bin/sh -c`, which expands `${PORT}`.
+# Falls back to 8000 if PORT is not set (e.g. local `docker run`). On Railway
+# `PORT` is provided automatically.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
